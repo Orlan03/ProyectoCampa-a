@@ -34,6 +34,7 @@ function poseLimbs(limbs, legL, legR, armL, armR, lambda, d) {
 export function Player() {
   const root = useRef()
   const body = useRef()
+  const shadow = useRef()
   const limbs = useRef({})
   const state = useRef(createState())
   const status = useGameStore((s) => s.status)
@@ -136,10 +137,23 @@ export function Player() {
     runtime.player.x = r.position.x
     runtime.player.y = s.y
     runtime.player.height = sliding ? PLAYER.slideHeight : PLAYER.height
+
+    // Sombra local pegada al asfalto (no usa ContactShadows: ese pase pintaba franjas al moverse).
+    if (shadow.current) {
+      const air = Math.min(1, s.y / 2.2)
+      shadow.current.position.y = 0.03 - r.position.y
+      const k = 1 + air * 0.9
+      shadow.current.scale.set(k, 1.35 * k, 1)
+      shadow.current.material.opacity = 0.32 * (1 - air * 0.75)
+    }
   })
 
   return (
     <group ref={root} position={[LANES[CENTER_LANE], 0, 0]}>
+      <mesh ref={shadow} rotation-x={-Math.PI / 2} position={[0, 0.03, 0.08]} renderOrder={2}>
+        <circleGeometry args={[0.48, 24]} />
+        <meshBasicMaterial color="#1a0c10" transparent opacity={0.32} depthWrite={false} fog={false} />
+      </mesh>
       <group ref={body}>
         <PlayerModel limbs={limbs} />
       </group>

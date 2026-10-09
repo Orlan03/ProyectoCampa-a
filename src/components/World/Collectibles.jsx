@@ -4,7 +4,7 @@ import { Object3D } from 'three'
 import { LANES, POOLS } from '../../config/gameConfig'
 import { MODELS } from '../../config/models'
 import { energyOrbs } from '../../game/runtime'
-import { HIDDEN_MATRIX } from '../../utils/instancing'
+import { HIDDEN_MATRIX, NO_SHADOW_LAYER } from '../../utils/instancing'
 import { InstancedParts, ModelParts } from '../Models/InstancedParts'
 import { createOrbBodyParts, createOrbRingParts } from './parts/energyOrb'
 
@@ -48,9 +48,11 @@ export function Collectibles() {
     <ModelParts model={MODELS.energyOrb} fallback={bodyParts}>
       {(parts) => (
         <>
-          <InstancedParts parts={parts} count={POOLS.energyOrbs} apiRef={bodyApi} />
+          <InstancedParts parts={parts} count={POOLS.energyOrbs} apiRef={bodyApi} layer={NO_SHADOW_LAYER} />
           {/* Con un .glb propio los anillos procedurales se omiten. */}
-          {parts === bodyParts && <InstancedParts parts={ringParts} count={POOLS.energyOrbs} apiRef={ringApi} />}
+          {parts === bodyParts && (
+            <InstancedParts parts={ringParts} count={POOLS.energyOrbs} apiRef={ringApi} layer={NO_SHADOW_LAYER} />
+          )}
         </>
       )}
     </ModelParts>

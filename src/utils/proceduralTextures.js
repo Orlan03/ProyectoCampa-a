@@ -13,7 +13,7 @@ function toTexture(canvas, { srgb = true, repeat = [1, 1] } = {}) {
   const texture = new CanvasTexture(canvas)
   texture.wrapS = texture.wrapT = RepeatWrapping
   texture.repeat.set(...repeat)
-  texture.anisotropy = 8
+  texture.anisotropy = 16
   texture.colorSpace = srgb ? SRGBColorSpace : NoColorSpace
   return texture
 }
@@ -45,32 +45,38 @@ function stains(ctx, size, count, color) {
   }
 }
 
-/** Asfalto con líneas de borde y carriles. Un tile = `tileLength` unidades de largo. */
+/** Asfalto húmedo nocturno: grano fino, manchas de aceite y marcas viales. Un tile = `tileLength`. */
 export function createAsphaltTextures({ width, tileLength, repeatY }) {
-  const S = 512
+  const S = 1024
   const [c, ctx] = makeCanvas(S)
   const [r, rctx] = makeCanvas(S)
 
-  ctx.fillStyle = '#3d3f42'
+  ctx.fillStyle = '#2a2c30'
   ctx.fillRect(0, 0, S, S)
-  rctx.fillStyle = '#d6d6d6'
+  rctx.fillStyle = '#9a9a9a'
   rctx.fillRect(0, 0, S, S)
-  stains(ctx, S, 16, 'rgba(20,20,22,0.18)')
-  speckle(ctx, rctx, S, 22000, [38, 95], [170, 255])
+  stains(ctx, S, 22, 'rgba(8,8,10,0.35)')
+  stains(ctx, S, 8, 'rgba(18, 28, 22, 0.12)')
+  speckle(ctx, rctx, S, 48000, [28, 78], [90, 210])
 
   const toPx = (x) => ((x + width / 2) / width) * S
-  const lineW = (0.13 / width) * S
+  const lineW = (0.11 / width) * S
   const paint = (x, y, w, h) => {
-    ctx.fillStyle = 'rgba(236,234,224,0.9)'
+    ctx.fillStyle = '#f4f0dc'
     ctx.fillRect(x, y, w, h)
-    rctx.fillStyle = '#7a7a7a'
+    rctx.fillStyle = '#4a4a4a'
     rctx.fillRect(x, y, w, h)
   }
 
-  for (const x of [-width / 2 + 0.3, width / 2 - 0.3]) paint(toPx(x) - lineW / 2, 0, lineW, S)
+  for (const x of [-width / 2 + 0.22, width / 2 - 0.22]) paint(toPx(x) - lineW / 2, 0, lineW, S)
 
-  const dash = (3 / tileLength) * S
-  for (const x of [-LANE_WIDTH / 2, LANE_WIDTH / 2]) paint(toPx(x) - lineW / 2, S * 0.1, lineW, dash)
+  const dashH = (2.4 / tileLength) * S
+  const gapH = (2.6 / tileLength) * S
+  for (const x of [-LANE_WIDTH / 2, LANE_WIDTH / 2]) {
+    for (let y = S * 0.08; y < S; y += dashH + gapH) {
+      paint(toPx(x) - lineW / 2, y, lineW, dashH)
+    }
+  }
 
   const repeat = [1, repeatY]
   return { map: toTexture(c, { repeat }), roughnessMap: toTexture(r, { srgb: false, repeat }) }

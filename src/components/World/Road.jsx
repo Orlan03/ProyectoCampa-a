@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { ROAD, SIDEWALK } from '../../config/gameConfig'
 import { runtime } from '../../game/runtime'
+import { NO_SHADOW_LAYER } from '../../utils/instancing'
 import { createAsphaltTextures, createSidewalkTextures } from '../../utils/proceduralTextures'
 
 const ROAD_CENTER_Z = ROAD.startZ - ROAD.length / 2
@@ -34,16 +35,18 @@ export function Road() {
 
   return (
     <group>
-      <mesh rotation-x={-Math.PI / 2} position={[0, 0, ROAD_CENTER_Z]}>
+      <mesh rotation-x={-Math.PI / 2} position={[0, 0, ROAD_CENTER_Z]} layers={NO_SHADOW_LAYER}>
         <planeGeometry args={[ROAD.width, ROAD.length]} />
-        <meshStandardMaterial
+        <meshPhysicalMaterial
           map={asphalt.map}
           roughnessMap={asphalt.roughnessMap}
           bumpMap={asphalt.roughnessMap}
-          bumpScale={0.6}
-          roughness={1}
-          metalness={0}
-          envMapIntensity={0.6}
+          bumpScale={0.22}
+          roughness={0.82}
+          metalness={0.08}
+          envMapIntensity={0.85}
+          clearcoat={0.08}
+          clearcoatRoughness={0.55}
         />
       </mesh>
 
@@ -58,20 +61,21 @@ export function Road() {
               map={sidewalk.map}
               roughnessMap={sidewalk.roughnessMap}
               bumpMap={sidewalk.roughnessMap}
-              bumpScale={0.4}
-              roughness={1}
+              bumpScale={0.55}
+              roughness={0.92}
+              envMapIntensity={0.45}
             />
           </mesh>
           <mesh position={[side * (ROAD.width / 2 + 0.08), SIDEWALK.height / 2, ROAD_CENTER_Z]}>
             <boxGeometry args={[0.16, SIDEWALK.height, ROAD.length]} />
-            <meshStandardMaterial color="#b9b5ab" roughness={0.85} />
+            <meshStandardMaterial color="#c4bfb4" roughness={0.7} metalness={0.08} />
           </mesh>
         </group>
       ))}
 
       <mesh rotation-x={-Math.PI / 2} position={[0, -0.02, -60]}>
         <planeGeometry args={[320, 320]} />
-        <meshStandardMaterial color="#557a2f" roughness={1} />
+        <meshStandardMaterial color="#3d5c28" roughness={1} />
       </mesh>
     </group>
   )

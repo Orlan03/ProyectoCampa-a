@@ -4,7 +4,7 @@ import { Object3D } from 'three'
 import { LANES, POOLS } from '../../config/gameConfig'
 import { MODELS } from '../../config/models'
 import { barriers, potholes, runtime } from '../../game/runtime'
-import { HIDDEN_MATRIX } from '../../utils/instancing'
+import { HIDDEN_MATRIX, NO_SHADOW_LAYER } from '../../utils/instancing'
 import { InstancedParts, ModelParts } from '../Models/InstancedParts'
 import { beaconMaterial, createBarrierParts } from './parts/barrier'
 import { createPotholeParts, POTHOLE_VARIANTS } from './parts/pothole'
@@ -58,7 +58,9 @@ export function Obstacles() {
     <>
       {POTHOLE_VARIANTS.map((seed, v) => (
         <ModelParts key={seed} model={MODELS.pothole} fallback={potholeParts[v]}>
-          {(parts) => <InstancedParts parts={parts} count={potholeCount(v)} apiRef={potholeApis[v]} />}
+          {(parts) => (
+            <InstancedParts parts={parts} count={potholeCount(v)} apiRef={potholeApis[v]} layer={NO_SHADOW_LAYER} />
+          )}
         </ModelParts>
       ))}
       <ModelParts model={MODELS.barrier} fallback={barrierParts}>

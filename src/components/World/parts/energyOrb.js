@@ -52,6 +52,7 @@ export function createOrbRingParts() {
         emissiveIntensity: 3,
         toneMapped: false,
       }),
+      layer: NO_SHADOW_LAYER,
     },
   ]
 }

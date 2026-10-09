@@ -29,7 +29,7 @@ export function GameCanvas() {
           stencil: false,
           powerPreference: 'high-performance',
           toneMapping: ACESFilmicToneMapping,
-          toneMappingExposure: 1.05,
+          toneMappingExposure: 1.18,
         }}
         onCreated={({ camera }) => camera.layers.enable(NO_SHADOW_LAYER)}
       >

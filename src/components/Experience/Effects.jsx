@@ -7,8 +7,8 @@ export function Effects({ quality }) {
   if (quality === 'medium') {
     return (
       <EffectComposer multisampling={0}>
-        <Bloom mipmapBlur luminanceThreshold={1} intensity={0.7} />
-        <Vignette offset={0.3} darkness={0.35} />
+        <Bloom mipmapBlur luminanceThreshold={0.85} intensity={0.95} radius={0.65} />
+        <Vignette offset={0.28} darkness={0.42} />
         <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
       </EffectComposer>
     )
@@ -17,8 +17,8 @@ export function Effects({ quality }) {
   return (
     <EffectComposer multisampling={4}>
       <N8AO halfRes quality="performance" aoRadius={1.4} intensity={2.2} distanceFalloff={1} />
-      <Bloom mipmapBlur luminanceThreshold={1} intensity={0.7} />
-      <Vignette offset={0.3} darkness={0.35} />
+      <Bloom mipmapBlur luminanceThreshold={0.85} intensity={0.95} radius={0.65} />
+      <Vignette offset={0.28} darkness={0.42} />
       <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
     </EffectComposer>
   )
