@@ -15,21 +15,19 @@ const TOTAL = HOUSES_PER_SIDE * SPACING
 const Z_MAX = 16
 const Z_MIN = Z_MAX - TOTAL
 const FRONT_X = ROAD.width / 2 + SIDEWALK.width
-const WINDOW_GLOW = 1.2
+const WINDOW_GLOW = 1.5
 
-// Paleta colonial andina: fachadas encaladas y pintadas en tonos vivos.
-const WALL_COLORS = ['#fbf3e4', '#f6c945', '#f28c4b', '#5aa9d6', '#ef7d7d', '#8cc49a', '#f3dcb2', '#c7a6e0']
-const ACCENT_COLORS = ['#1d4e89', '#1f8a70', '#9b2226', '#5b3a8e', '#0f5e66']
+// Fachadas de pueblo andino: blanco, mostaza, celeste pastel, salmón, verde menta.
+const WALL_COLORS = ['#f7f4ee', '#e0a000', '#7eb6dc', '#e88878', '#6fbfa4']
 const VARIANTS = [
-  { floors: 1, width: 8.4, depth: 6 },
-  { floors: 2, width: 8.8, depth: 7 },
-  { floors: 2, width: 8.2, depth: 6.5 },
-  { floors: 1, width: 8.9, depth: 7 },
+  { floors: 1, width: 7.2, depth: 5.8, windows: 1 },
+  { floors: 1, width: 8.0, depth: 6.2, windows: 2 },
+  { floors: 2, width: 7.6, depth: 6.0, windows: 2 },
 ]
 
 const mod = (a, n) => ((a % n) + n) % n
 
-/** Casas recicladas a ambos lados: 4 variantes × 6 piezas = 24 draw calls para todas. */
+/** Casas recicladas a ambos lados: 3 variantes × 4 piezas, un draw call por pieza. */
 export function Buildings() {
   const dummy = useMemo(() => new Object3D(), [])
   const variantParts = useMemo(() => VARIANTS.map(createHouseParts), [])
@@ -47,9 +45,11 @@ export function Buildings() {
           index: perVariant[variant]++,
           baseZ: Z_MAX - i * SPACING - (side > 0 ? SPACING / 2 : 0),
           wall: new Color(pick(WALL_COLORS, rand)),
-          accent: new Color(pick(ACCENT_COLORS, rand)),
-          // Algunas casas tienen luz interior que se enciende al llegar el jugador.
-          hasLights: rand() < 0.7,
+          // Altura y profundidad distintas para que la cuadra no se repita.
+          heightScale: 0.88 + rand() * 0.28,
+          depthScale: 0.86 + rand() * 0.28,
+          // La mayoría enciende las ventanas cuando el jugador se acerca.
+          hasLights: rand() < 0.85,
           lightOffset: rand() * 10,
           setback: rand() * 0.35,
           state: { z: 0, on: false, glow: 0 },
@@ -65,7 +65,6 @@ export function Buildings() {
   useLayoutEffect(() => {
     for (const h of houses) {
       apis[h.variant].current?.setColorAt(h.index, h.wall, 'walls')
-      apis[h.variant].current?.setColorAt(h.index, h.accent, 'accent')
     }
   }, [houses, apis])
 
@@ -89,6 +88,8 @@ export function Buildings() {
       // Lado derecho girado 180° (no espejado): las instancias con escala negativa se verían del revés.
       dummy.position.set(h.side * (FRONT_X + h.setback), 0, z)
       dummy.rotation.set(0, h.side > 0 ? Math.PI : 0, 0)
+      // X local es la profundidad del lote; Y es la altura. La fachada (Z) no se estira para no chocar.
+      dummy.scale.set(h.depthScale, h.heightScale, 1)
       dummy.updateMatrix()
       apis[h.variant].current?.setMatrixAt(h.index, dummy.matrix)
     }

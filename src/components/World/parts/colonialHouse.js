@@ -1,70 +1,89 @@
-import { MeshPhysicalMaterial } from 'three'
+import { MeshStandardMaterial } from 'three'
 import { box, hipRoof, merge } from '../../../utils/geometry'
 import { withInstanceGlow } from '../../../utils/instancing'
 import { standardMaterial } from '../../../utils/materials'
 
-const FLOOR_HEIGHT = 3.2
+const FLOOR_HEIGHT = 3.05
 
-// Paredes y zócalo en blanco: el color real de cada casa va en instanceColor.
+// Paredes en blanco: el color de cada casa va en instanceColor.
 const materials = {
-  walls: () => standardMaterial('house-wall', { color: '#ffffff', roughness: 0.88 }),
-  accent: () => standardMaterial('house-accent', { color: '#ffffff', roughness: 0.6 }),
-  wood: () => standardMaterial('wood', { color: '#6b3f1f', roughness: 0.7 }),
-  frame: () => standardMaterial('frame', { color: '#fbf6ec', roughness: 0.55 }),
-  roof: () => standardMaterial('roof', { color: '#c2582a', roughness: 0.78 }),
+  walls: () =>
+    standardMaterial('house-wall-v2', {
+      color: '#ffffff',
+      roughness: 0.94,
+      metalness: 0,
+      envMapIntensity: 0.22,
+    }),
+  door: () =>
+    standardMaterial('house-door-v2', {
+      color: '#3d2918',
+      roughness: 0.9,
+      metalness: 0,
+      envMapIntensity: 0.15,
+    }),
+  roof: () =>
+    standardMaterial('house-roof-v2', {
+      color: '#7a3422',
+      roughness: 0.96,
+      metalness: 0,
+      envMapIntensity: 0.35,
+    }),
 }
 
-// Vidrio reflectivo con luz interior por instancia; su emissiveIntensity global se usa para el apagón.
+// Vidrio cálido. emissiveIntensity lo baja el apagón; instanceGlow enciende cada casa aparte.
 export const windowMaterial = withInstanceGlow(
-  new MeshPhysicalMaterial({
-    color: '#1b2730',
-    roughness: 0.06,
-    metalness: 0.1,
-    envMapIntensity: 1.4,
-    clearcoat: 1,
-    emissive: '#ffb35c',
-    emissiveIntensity: 1.2,
+  new MeshStandardMaterial({
+    color: '#fef08a',
+    emissive: '#fef08a',
+    emissiveIntensity: 1.5,
+    roughness: 0.42,
+    metalness: 0,
   }),
 )
 
 /**
- * Casa colonial con la fachada en x = 0 mirando a +x, separada en una pieza por material
- * para dibujar todas las casas de una variante con un draw call por pieza.
+ * Casa de pueblo andino. La fachada queda en x = 0, mirando hacia +x (la calle).
+ * Una pieza por material: todas las casas de una variante salen en un draw call por pieza.
+ * El techo es un cono de 4 lados rotado 45° (pirámide de teja) estirado al largo de la casa.
  */
-export function createHouseParts({ floors, width, depth }) {
-  const H = floors * FLOOR_HEIGHT + 0.4
-  const roofH = 1.5 + width * 0.05
-  const wood = [box(0.5, 0.16, width + 0.6, [0.1, H + 0.02, 0]), box(0.14, 2.4, 1.5, [0.04, 1.2, 0])]
-  const frame = []
+export function createHouseParts({ floors = 1, width, depth, windows = 2 }) {
+  const H = floors * FLOOR_HEIGHT
+  const roofH = 2.35 + width * 0.04
   const glass = []
+  const doorZ = windows === 1 ? -width * 0.22 : 0
 
-  const addWindow = (y, z, w = 1.0, h = 1.35) => {
-    frame.push(box(0.07, h + 0.22, w + 0.22, [0.035, y, z]))
-    frame.push(box(0.22, 0.08, w + 0.4, [0.1, y - h / 2 - 0.12, z]))
-    glass.push(box(0.04, h, w, [0.075, y, z]))
+  const addWindow = (y, z, w = 1.35, h = 1.5) => {
+    glass.push(box(0.1, h, w, [0.07, y, z]))
   }
 
-  addWindow(1.55, -width * 0.3)
-  addWindow(1.55, width * 0.3)
+  if (windows === 1) {
+    addWindow(1.72, width * 0.2, 1.2, 1.35)
+  } else {
+    addWindow(1.65, -width * 0.3)
+    addWindow(1.65, width * 0.3)
+  }
 
-  for (let f = 1; f < floors; f++) {
-    const y = f * FLOOR_HEIGHT + 1.55
-    for (const z of [-width * 0.33, 0, width * 0.33]) addWindow(y, z, 0.95, 1.6)
-    wood.push(box(0.95, 0.12, width * 0.82, [0.47, f * FLOOR_HEIGHT + 0.7, 0]))
-    wood.push(box(0.06, 0.85, width * 0.82, [0.92, f * FLOOR_HEIGHT + 1.2, 0]))
-    wood.push(box(0.9, 0.06, 0.06, [0.47, f * FLOOR_HEIGHT + 1.62, -width * 0.41]))
-    wood.push(box(0.9, 0.06, 0.06, [0.47, f * FLOOR_HEIGHT + 1.62, width * 0.41]))
+  if (floors > 1) {
+    const y = FLOOR_HEIGHT + 1.5
+    addWindow(y, -width * 0.28, 1.0, 1.15)
+    addWindow(y, width * 0.28, 1.0, 1.15)
   }
 
   return [
-    { name: 'walls', geometry: box(depth, H, width, [-depth / 2, H / 2, 0]), material: materials.walls() },
-    { name: 'accent', geometry: box(0.08, 0.75, width, [0.04, 0.375, 0]), material: materials.accent() },
-    { name: 'wood', geometry: merge(wood), material: materials.wood() },
-    { name: 'frame', geometry: merge(frame), material: materials.frame() },
+    {
+      name: 'walls',
+      geometry: box(depth, H, width, [-depth / 2, H / 2, 0]),
+      material: materials.walls(),
+    },
+    {
+      name: 'door',
+      geometry: box(0.16, 2.25, 1.35, [0.06, 1.12, doorZ]),
+      material: materials.door(),
+    },
     { name: 'glass', geometry: merge(glass), material: windowMaterial, glow: true },
     {
       name: 'roof',
-      geometry: hipRoof(depth + 1.4, roofH, width + 1.0, [-depth / 2, H + 0.1, 0]),
+      geometry: hipRoof(depth + 1.6, roofH, width + 1.2, [-depth / 2, H - 0.04, 0]),
       material: materials.roof(),
     },
   ]
