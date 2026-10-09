@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Destellos blancos del cortocircuito, sincronizados con el parpadeo de las luces. */
+@keyframes spark {
+  0% { opacity: 0.55; }
+  12% { opacity: 0; }
+  22% { opacity: 0.35; }
+  34% { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+@keyframes flicker {
+  0%, 18%, 30%, 52% { opacity: 0; }
+  10%, 24%, 40%, 100% { opacity: 1; }
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+body {
+  background: #3a2f5c;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+}
