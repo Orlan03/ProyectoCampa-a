@@ -25,6 +25,7 @@ export function Player() {
   const poseRef = useRef('run')
   const state = useRef(createState())
   const status = useGameStore((s) => s.status)
+  const shieldOn = useGameStore((s) => s.shield)
   const runId = useGameStore((s) => s.runId)
 
   useEffect(() => {
@@ -53,6 +54,9 @@ export function Player() {
       case 'slide':
         s.slideTime = GAME.slideDuration
         if (!s.grounded) s.vy = Math.min(s.vy, -GAME.jumpVelocity * 1.1)
+        break
+      case 'power':
+        useGameStore.getState().usePower()
         break
     }
   }, [])
@@ -120,6 +124,10 @@ export function Player() {
       <mesh ref={shadow} rotation-x={-Math.PI / 2} position={[0, 0.03, 0.08]} renderOrder={2}>
         <circleGeometry args={[0.55, 24]} />
         <meshBasicMaterial color="#1a0c10" transparent opacity={0.32} depthWrite={false} fog={false} />
+      </mesh>
+      <mesh visible={shieldOn} position={[0, 1.05, 0]}>
+        <sphereGeometry args={[1.2, 20, 16]} />
+        <meshBasicMaterial color="#fde047" transparent opacity={0.35} depthWrite={false} fog={false} />
       </mesh>
       <group ref={body}>
         {/*

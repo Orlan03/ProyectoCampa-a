@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
+import { MathUtils } from 'three'
 import { GAME } from '../../config/gameConfig'
 import { fallsInPothole, hitsBarrier, touchesOrb } from '../../game/collisions'
 import { barriers, energyOrbs, potholes, runtime, speedProgress } from '../../game/runtime'
@@ -12,7 +13,16 @@ function advanceObstacles(pool, dz, hits) {
     if (!o.active) continue
     const prevZ = o.z
     o.z += dz
-    if (hits(runtime.player, o, prevZ)) return true
+    if (hits(runtime.player, o, prevZ)) {
+      if (runtime.shield) {
+        runtime.shield = false
+        o.active = false
+        runtime.shake = 0.28
+        useGameStore.getState().onShieldBroke()
+      } else {
+        return true
+      }
+    }
     // Pasó detrás de la cámara: queda libre para que el spawner lo recicle delante.
     if (o.z > GAME.despawnZ) o.active = false
   }
@@ -50,6 +60,8 @@ export function GameLoop() {
       } else if (touchesOrb(runtime.player, orb, prevZ)) {
         orb.collected = true
         store.addEnergy()
+      } else if (performance.now() < runtime.magnetUntil && orb.z < 3 && orb.z > -32) {
+        orb.x = MathUtils.damp(orb.x, runtime.player.x, 7, d)
       } else if (orb.z > GAME.despawnZ) {
         orb.active = false
       }

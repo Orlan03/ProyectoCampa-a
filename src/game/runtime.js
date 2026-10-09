@@ -12,6 +12,8 @@ export const runtime = {
   shake: 0,
   power: 1, // 0 = apagón total, 1 = luces normales
   blackoutAt: 0,
+  shield: false,
+  magnetUntil: 0,
   player: { x: 0, y: 0, height: PLAYER.height },
 }
 
@@ -39,6 +41,7 @@ export const energyOrbs = Array.from({ length: POOLS.energyOrbs }, (_, id) => ({
   collected: false,
   collectT: 0,
   lane: 1,
+  x: 0,
   z: 0,
   y: 1,
 }))
@@ -55,6 +58,8 @@ export function resetRuntime() {
   runtime.nextGap = GAME.firstGap
   runtime.shake = 0
   runtime.power = 1
+  runtime.shield = false
+  runtime.magnetUntil = 0
   runtime.player.x = 0
   runtime.player.y = 0
   runtime.player.height = PLAYER.height

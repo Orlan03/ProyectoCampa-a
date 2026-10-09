@@ -19,6 +19,9 @@ export function StartScreen() {
         <div className="mt-4 grid grid-cols-2 gap-2 text-[11px] text-white/80">
           <span className="rounded-xl bg-white/10 px-2 py-1.5">{isMobile ? 'Desliza ← →' : 'Flechas ← →'} cambiar carril</span>
           <span className="rounded-xl bg-white/10 px-2 py-1.5">{isMobile ? 'Desliza ↑' : 'Flecha ↑'} saltar bache</span>
+          <span className="col-span-2 rounded-xl bg-white/10 px-2 py-1.5">
+            {isMobile ? 'Toca el botón' : 'Tecla E'} para gastar kW en un poder
+          </span>
         </div>
 
         <button

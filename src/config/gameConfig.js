@@ -36,6 +36,13 @@ export const POOLS = { potholes: 10, barriers: 8, energyOrbs: 15 }
 
 export const ENERGY = { kwPerOrb: 10, spacing: 2.2, perLine: 5 }
 
+// Un botón recorre estos poderes. El costo se descuenta de los kW recolectados.
+export const POWERS = [
+  { id: 'shield', label: 'Escudo', cost: 30, detail: 'Aguanta el próximo choque' },
+  { id: 'magnet', label: 'Imán', cost: 20, duration: 4, detail: 'Atrae la energía cercana' },
+  { id: 'repair', label: 'Arreglar', cost: 40, detail: 'Quita el obstáculo de enfrente' },
+]
+
 // Ambiente de atardecer: el horizonte y la niebla comparten color para fundir la distancia.
 export const WORLD = {
   fogColor: '#e59a72',

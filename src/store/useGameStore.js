@@ -1,7 +1,10 @@
 import { create } from 'zustand'
-import { ENERGY, GAME } from '../config/gameConfig'
+import { ENERGY, GAME, POWERS } from '../config/gameConfig'
+import { clearAhead } from '../game/powers'
 import { resetRuntime, runtime } from '../game/runtime'
 import { isMobile } from '../utils/device'
+
+let noticeTimer = 0
 
 const BEST_KEY = 'biblian-runner-best-kw'
 // Si el equipo no sostiene los FPS solo se baja de 'high' a 'medium' (sin AO ni MSAA):
@@ -16,7 +19,16 @@ function readBest() {
   }
 }
 
-export const useGameStore = create((set, get) => ({
+export const useGameStore = create((set, get) => {
+  const flash = (notice) => {
+    set({ notice })
+    clearTimeout(noticeTimer)
+    noticeTimer = setTimeout(() => {
+      if (get().notice === notice) set({ notice: null })
+    }, 1400)
+  }
+
+  return {
   status: 'menu', // 'menu' | 'playing' | 'blackout' | 'gameover'
   runId: 0,
   distance: 0,
@@ -24,6 +36,9 @@ export const useGameStore = create((set, get) => ({
   best: readBest(),
   isNewRecord: false,
   quality: isMobile ? 'medium' : 'high',
+  powerIndex: 0,
+  shield: false,
+  notice: null,
 
   start() {
     resetRuntime()
@@ -33,7 +48,48 @@ export const useGameStore = create((set, get) => ({
       distance: 0,
       energy: 0,
       isNewRecord: false,
+      powerIndex: 0,
+      shield: false,
+      notice: null,
     }))
+  },
+
+  usePower() {
+    const s = get()
+    if (s.status !== 'playing') return false
+    const power = POWERS[s.powerIndex % POWERS.length]
+    if (s.energy < power.cost) return false
+
+    if (power.id === 'shield') {
+      if (runtime.shield) {
+        flash('El escudo ya está activo')
+        return false
+      }
+      runtime.shield = true
+      set({ energy: s.energy - power.cost, shield: true, powerIndex: (s.powerIndex + 1) % POWERS.length })
+      flash('Escudo activo')
+      return true
+    }
+
+    if (power.id === 'magnet') {
+      runtime.magnetUntil = performance.now() + power.duration * 1000
+      set({ energy: s.energy - power.cost, powerIndex: (s.powerIndex + 1) % POWERS.length })
+      flash('Imán activo')
+      return true
+    }
+
+    if (!clearAhead()) {
+      flash('No hay nada que arreglar enfrente')
+      return false
+    }
+    set({ energy: s.energy - power.cost, powerIndex: (s.powerIndex + 1) % POWERS.length })
+    flash('Obstáculo arreglado')
+    return true
+  },
+
+  onShieldBroke() {
+    set({ shield: false })
+    flash('¡El escudo aguantó el golpe!')
   },
 
   // Choque con un bache: apagón de `blackoutMs` y luego la pantalla final.
@@ -69,4 +125,5 @@ export const useGameStore = create((set, get) => ({
     const i = QUALITY_STEPS.indexOf(get().quality)
     if (i < QUALITY_STEPS.length - 1) set({ quality: QUALITY_STEPS[i + 1] })
   },
-}))
+}
+})

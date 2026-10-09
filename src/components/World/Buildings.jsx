@@ -1,8 +1,9 @@
 import { useLayoutEffect, useMemo } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Color, MathUtils, Object3D } from 'three'
+import { useGLTF } from '@react-three/drei'
 import { ROAD, SIDEWALK, WORLD } from '../../config/gameConfig'
-import { MODELS } from '../../config/models'
+import { HOUSES } from '../../config/models'
 import { runtime } from '../../game/runtime'
 import { isMobile } from '../../utils/device'
 import { createGlowAttribute, NO_SHADOW_LAYER } from '../../utils/instancing'
@@ -10,7 +11,9 @@ import { mulberry32, pick } from '../../utils/random'
 import { InstancedParts, ModelParts } from '../Models/InstancedParts'
 import { createHouseParts, windowMaterial } from './parts/colonialHouse'
 const HOUSES_PER_SIDE = isMobile ? 10 : 12
-const SPACING = 9.6
+const SPACING = 10
+
+for (const house of HOUSES) useGLTF.preload(house.url)
 const TOTAL = HOUSES_PER_SIDE * SPACING
 const Z_MAX = 16
 const Z_MIN = Z_MAX - TOTAL
@@ -96,7 +99,7 @@ export function Buildings() {
   })
 
   return VARIANTS.map((_, v) => (
-    <ModelParts key={v} model={MODELS.house} fallback={variantParts[v]}>
+    <ModelParts key={v} model={HOUSES[v % HOUSES.length]} fallback={variantParts[v]}>
       {(parts) => (
         // Fuera de la zona de ContactShadows: en NO_SHADOW_LAYER no se dibujan en su pase.
         <InstancedParts parts={parts} count={perVariant[v]} glow={glows[v]} apiRef={apis[v]} layer={NO_SHADOW_LAYER} />

@@ -10,6 +10,7 @@ const KEY_ACTIONS = {
   w: 'jump',
   s: 'slide',
   ' ': 'jump',
+  e: 'power',
 }
 
 const SWIPE_THRESHOLD = 28

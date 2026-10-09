@@ -1,4 +1,4 @@
-import { ENERGY, GAME, OBSTACLE_WEIGHTS } from '../config/gameConfig'
+import { ENERGY, GAME, LANES, OBSTACLE_WEIGHTS } from '../config/gameConfig'
 import { pick, randRange, shuffle } from '../utils/random'
 import { barriers, energyOrbs, potholes } from './runtime'
 
@@ -23,7 +23,7 @@ export function nextGap(speed) {
 
 function placeOrb(lane, z, y) {
   const orb = acquire(energyOrbs)
-  Object.assign(orb, { active: true, collected: false, collectT: 0, lane, z, y })
+  Object.assign(orb, { active: true, collected: false, collectT: 0, lane, x: LANES[lane], z, y })
 }
 
 function orbLine(lane, rowZ) {

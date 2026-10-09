@@ -30,7 +30,7 @@ export function Collectibles() {
       }
       const k = orb.collected ? orb.collectT / 0.3 : 0
       const spin = t * 2 + orb.id
-      dummy.position.set(LANES[orb.lane], orb.y + Math.sin(t * 3 + orb.id) * 0.08 + k * 1.5, orb.z)
+      dummy.position.set(orb.x ?? LANES[orb.lane], orb.y + Math.sin(t * 3 + orb.id) * 0.08 + k * 1.5, orb.z)
       dummy.scale.setScalar(1 + k * 0.6 - k * k * 1.5)
       dummy.rotation.set(0, spin, 0)
       dummy.updateMatrix()

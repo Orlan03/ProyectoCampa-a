@@ -20,7 +20,8 @@ export function hitsBarrier(player, b, prevZ) {
 }
 
 export function touchesOrb(player, orb, prevZ) {
-  if (Math.abs(player.x - LANES[orb.lane]) > 0.8) return false
+  const x = orb.x ?? LANES[orb.lane]
+  if (Math.abs(player.x - x) > 0.8) return false
   if (prevZ > 0.6 || orb.z < -0.6) return false
   return orb.y > player.y - 0.3 && orb.y < player.y + player.height + 0.3
 }
